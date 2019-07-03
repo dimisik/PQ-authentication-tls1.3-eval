@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Provide PQ signature algorithm name, Supported Name List: `picnicl1fs`, `qteslaI`, `qteslaIIIsize`, `qteslaIIIspeed`, `dilithium2`, `dilithium3`, `dilithium4`
+SigAlg=${1?Error: no PQ signature algorithm given}
+
+current_d="$(pwd)"
+dir="$(pwd)"/../pq_sig_eval_Keys_Certs
+
+
+
+cd ../openssl/
+apps/openssl req -x509 -new -newkey $SigAlg -keyout $dir/"$SigAlg"_CA.key -out $dir/"$SigAlg"_CA.crt \
+-nodes -subj "/CN=oqstest CA" -days 365 -config $current_d/openssl.cnf
+
+
+apps/openssl genpkey -algorithm $SigAlg -out $dir/"$SigAlg"_srv.key
+
+apps/openssl req -new -newkey $SigAlg -keyout $dir/"$SigAlg"_srv.key -out $dir/"$SigAlg"_srv.csr -nodes \
+-subj "/CN=oqstest server" -config $current_d/openssl.cnf
+
+apps/openssl x509 -req -in $dir/"$SigAlg"_srv.csr -out $dir/"$SigAlg"_srv.crt -CA $dir/"$SigAlg"_CA.crt \
+-CAkey $dir/"$SigAlg"_CA.key -CAcreateserial -days 365
+
+apps/openssl s_server -cert $dir/"$SigAlg"_srv.crt -key $dir/"$SigAlg"_srv.key -www -tls1_3

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+dir="$(pwd)"
+
+cd ../liboqs/
+autoreconf -i
+./configure --prefix=../openssl/oqs --enable-shared=no --enable-openssl --with-openssl-dir=/usr/local/openssl13 
+make -j
+make install
+
+cd ..
+cd openssl/
+./Configure no-shared linux-x86_64 -lm
+make -j

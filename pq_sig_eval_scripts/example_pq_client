@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Provide PQ signature algorithm name, Supported Name List: `picnicl1fs`, `qteslaI`, `qteslaIIIsize`, `qteslaIIIspeed`, `dilithium2`, `dilithium3`, `dilithium4`
+SigAlg=${1?Error: no PQ signature algorithm given}
+
+dir="$(pwd)"/../pq_sig_eval_Keys_Certs
+
+cd ../openssl/
+
+apps/openssl s_client -CAfile $dir/"$SigAlg"_CA.crt -connect localhost:4433

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Provide PQ signature algorithm name, Supported Name List: `picnicl1fs`, `qteslaI`, `qteslaIIIsize`, `qteslaIIIspeed`, `dilithium2`, `dilithium3`, `dilithium4`
+SigAlg=${1?Error: no PQ signature algorithm given}
+
+current_d="$(pwd)"
+dir="$(pwd)"/../pq_sig_eval_Keys_Certs
+
+
+cd ../openssl/
+
+# Generate Root Certificate Key and Root Certificate
+apps/openssl req -x509 -new -newkey $SigAlg -keyout $dir/RootCA.key -out $dir/RootCA.crt -nodes -subj "/CN=oqstest CA" -days 365 -config $current_d/openssl.cnf
+
+
+# Generate Inermediate CA certificate key (ICAa)
+apps/openssl genpkey -algorithm $SigAlg -out $dir/ICAa.key
+# Generate Intermediate CA (ICAa) .csr
+apps/openssl req -new -newkey $SigAlg -keyout $dir/ICAa.key -out $dir/ICAa.csr -nodes -subj "/CN=oqstest ICAa" -config $current_d/openssl_ICAa.cnf
+# Sign the Intermediate CA (ICAa) by the Root CA
+apps/openssl x509 -req -extfile $current_d/openssl.cnf -extensions v3_intermediate_ca -in $dir/ICAa.csr -out $dir/ICAa.crt -CA $dir/RootCA.crt \
+             -CAkey $dir/RootCA.key -CAcreateserial -days 365 
+#apps/openssl ca -config apps/openssl.cnf -extensions v3_intermediate_ca -days 365 -notext -in ICAa.csr -out ICAa.crt
+
+# Generate Server certificate key
+apps/openssl genpkey -algorithm $SigAlg -out Server.key
+# Generate Server Certificate .csr
+apps/openssl req -new -newkey $SigAlg -keyout $dir/Server.key -out $dir/Server.csr -nodes -subj "/CN=oqstest server" -config $current_d/openssl_ICAa.cnf
+# Sign the Server Certificate CSR using the Intermediate CA
+apps/openssl x509 -req -in $dir/Server.csr -out $dir/Server.crt -CA $dir/ICAa.crt -CAkey $dir/ICAa.key -CAcreateserial -days 365
+
+
+apps/openssl s_server -cert $dir/Server.crt -key $dir/Server.key -chainCAfile $dir/ICAa.crt -www -tls1_3

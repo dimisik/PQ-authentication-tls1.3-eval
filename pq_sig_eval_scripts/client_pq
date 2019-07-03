@@ -1,0 +1,8 @@
+#!/bin/bash
+
+
+dir="$(pwd)"/../pq_sig_eval_Keys_Certs
+
+cd ../openssl/
+
+apps/openssl s_client -CAfile $dir/RootCA.crt -connect localhost:4433
