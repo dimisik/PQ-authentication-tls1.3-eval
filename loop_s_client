@@ -1,0 +1,19 @@
+#/usr/bin/bash
+
+# Provide number of iterations
+
+loop=0
+while :
+do
+    # Start/Stop s_client
+    echo "Q" | openssl s_client -connect 127.0.0.1:23456 -cert estCA/cacert.crt -key estCA/private/cakey.pem -CAfile estCA/cacert.crt
+
+    # Increment loop counter
+    loop=`expr $loop + 1`
+    if [ $loop -ge $1 ]
+    then
+        break
+    fi
+    sleep 1
+done
+exit 0

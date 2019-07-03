@@ -1,0 +1,3 @@
+#/usr/bin/bash
+
+tshark -i lo -f "tcp port 23456" -w test1.pcap
