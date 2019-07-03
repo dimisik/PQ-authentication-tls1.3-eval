@@ -22,11 +22,11 @@ apps/openssl x509 -req -extfile $current_d/openssl.cnf -extensions v3_intermedia
 			-CA $dir/RootCA.crt -CAkey $dir/RootCA.key -days 365 -CAcreateserial
 #apps/openssl ca -config apps/openssl.cnf -extensions v3_intermediate_ca -days 365 -notext -in ICAb1.csr -out ICAb1.crt
 
-# Generate Second Inermediate CA certificate key (ICAb1)
+# Generate Second Inermediate CA certificate key (ICAb2)
 apps/openssl genpkey -algorithm $SigAlg -out $dir/ICAb2.key
 # Generate Second Intermediate CA (ICAb2) .csr
 apps/openssl req -new -newkey $SigAlg -keyout $dir/ICAb2.key -out $dir/ICAb2.csr -nodes -subj "/CN=oqstest ICAb2" -config $current_d/openssl_ICAb2.cnf
-# Sign the Second Intermediate CA (ICAb1) by the First Intermediate CA
+# Sign the Second Intermediate CA (ICAb2) by the First Intermediate CA (ICAb1)
 apps/openssl x509 -req -extfile $current_d/openssl_ICAb1.cnf -extensions v3_intermediate_ca -in $dir/ICAb2.csr -out $dir/ICAb2.crt \
 			-CA $dir/ICAb1.crt -CAkey $dir/ICAb1.key -days 365 -CAcreateserial
 
@@ -35,7 +35,7 @@ apps/openssl x509 -req -extfile $current_d/openssl_ICAb1.cnf -extensions v3_inte
 apps/openssl genpkey -algorithm $SigAlg -out $dir/Server.key
 # Generate Server Certificate .csr
 apps/openssl req -new -newkey $SigAlg -keyout $dir/Server.key -out $dir/Server.csr -nodes -subj "/CN=oqstest server" -config $current_d/openssl_ICAb2.cnf
-# Sign the Server Certificate CSR using the Intermediate CA
+# Sign the Server Certificate CSR using the Second Intermediate CA (ICAb2)
 apps/openssl x509 -req -in $dir/Server.csr -out $dir/Server.crt -CA $dir/ICAb2.crt -CAkey $dir/ICAb2.key -CAcreateserial -days 365
 
 cat $dir/ICAb2.crt $dir/ICAb1.crt > $dir/doubleICA.crt

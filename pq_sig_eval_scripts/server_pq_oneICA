@@ -26,7 +26,7 @@ apps/openssl x509 -req -extfile $current_d/openssl.cnf -extensions v3_intermedia
 apps/openssl genpkey -algorithm $SigAlg -out Server.key
 # Generate Server Certificate .csr
 apps/openssl req -new -newkey $SigAlg -keyout $dir/Server.key -out $dir/Server.csr -nodes -subj "/CN=oqstest server" -config $current_d/openssl_ICAa.cnf
-# Sign the Server Certificate CSR using the Intermediate CA
+# Sign the Server Certificate CSR using the Intermediate CA (ICAa)
 apps/openssl x509 -req -in $dir/Server.csr -out $dir/Server.crt -CA $dir/ICAa.crt -CAkey $dir/ICAa.key -CAcreateserial -days 365
 
 
