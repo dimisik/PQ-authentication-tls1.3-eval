@@ -27,7 +27,13 @@ start_dict = {}
 finish_dict = {}
 start_time=0
 rtt_start=0
+cert_start=0
 rtt=0
+cert_flag = 0
+cert_data = 0
+cert_stop = 0
+cert_dur = 0
+deb=0
 for line in output.split('\n'):
     line = line.strip(' ')
     # Beginning of the session
@@ -46,14 +52,38 @@ for line in output.split('\n'):
         line = re.sub(' +', ' ', line)
         line_list = line.split(' ')
         start_dict[loop_count] = '{},{},'.format(line_list[0], line_list[1],)
-        start_time=float(line_list[1])
+        start_time = float(line_list[1])
         continue
-    # End of the session (look for the last Application data)
-    if line.find('Application Data') != -1:
+    if line.find('Server Hello') != -1:
+    	cert_data = 0
+    	cert_dur = 0
+        cert_flag = 1
         line = re.sub(' +', ' ', line)
         line_list = line.split(' ')
-        finish_dict[loop_count] = '{},{},{},{}'.format(line_list[0], line_list[1], \
-                   str(float(line_list[1])-start_time), rtt)
+        cert_start = float(line_list[1])
+        continue        
+#    if (cert_flag == 1) and (line.find('Application Data') != -1):
+#    	line = re.sub(' +', ' ', line)
+#        line_list = line.split(' ')
+#        cert_data = cert_data + float(line_list[6])
+#        cert_stop = float(line_list[1])
+#        continue        
+    if line.find('Change Cipher Spec') != -1: 
+        cert_flag = 0
+        cert_dur = cert_stop - cert_start
+        continue           
+    # End of the session (look for the last Application data)
+    if line.find('Application Data') != -1:
+        if cert_flag == 1:
+            line = re.sub(' +', ' ', line)
+            line_list = line.split(' ')
+            cert_data = cert_data + float(line_list[6])
+            cert_stop = float(line_list[1])
+        else:
+            line = re.sub(' +', ' ', line)
+            line_list = line.split(' ')
+            finish_dict[loop_count] = '{},{},{},{},{},{}'.format(line_list[0], line_list[1], \
+                   str(float(line_list[1])- start_time), rtt, str(cert_dur), str(cert_data))
 
 # Print the results in CSV format
 for loop in range(1, loop_count+1):
