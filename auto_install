@@ -2,9 +2,9 @@
 
 dir="$(pwd)"
 
-cd ../liboqs/
+cd liboqs/
 autoreconf -i
-./configure --prefix=../openssl/oqs --enable-shared=no --enable-openssl --with-openssl-dir=/usr/local/openssl13 
+./configure --prefix=$dir/openssl/oqs --enable-shared=no --enable-openssl --with-openssl-dir=/usr/local/openssl13 
 make -j
 make install
 
