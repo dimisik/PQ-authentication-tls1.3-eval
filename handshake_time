@@ -27,12 +27,13 @@ start_dict = {}
 finish_dict = {}
 start_time=0
 rtt_start=0
-rtt=0
 cert_start=0
+rtt=0
 cert_flag = 0
 cert_data = 0
 cert_stop = 0
 cert_dur = 0
+tcp_retran_count=0
 deb=0
 for line in output.split('\n'):
     line = line.strip(' ')
@@ -61,7 +62,9 @@ for line in output.split('\n'):
         cert_flag = 1
         line = re.sub(' +', ' ', line)
         line_list = line.split(' ')
+        cert_data = cert_data + float(line_list[6])
         cert_start = float(line_list[1])
+        cert_stop = float(line_list[1])
         continue          
     if line.find('Change Cipher Spec') != -1: 
         cert_flag = 0
