@@ -1,10 +1,21 @@
 #!/bin/bash
 
+#Install Openssl 1.1.1
+# cd /tmp
+#   wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
+#   tar xvf openssl-1.1.1.tar.gz
+#   cd openssl-1.1.1
+#    sudo ./config -Wl,--enable-new-dtags,-rpath,'$(LIBRPATH)' --prefix=/usr/local/openssl13 --openssldir=/usr/local/openssl13
+#   sudo make
+#   sudo make install
+
+
+
 dir="$(pwd)"
 
 cd liboqs/
 autoreconf -i
-./configure --prefix=$dir/openssl/oqs --enable-shared=no --enable-openssl --with-openssl-dir=/usr/local/openssl13 
+./configure --prefix=home/dsike/pq_auth_eval_tls1.3/openssl/oqs --enable-shared=no --enable-openssl --with-openssl-dir=/usr/local/openssl13 
 make -j
 make install
 
