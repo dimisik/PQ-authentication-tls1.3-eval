@@ -7,7 +7,7 @@ loop=0
 while :
 do
     # Start/Stop s_client
-    echo "Q" | openssl/apps/openssl s_client -CAfile $dir/RootCA.crt -connect localhost:4433
+    echo "Q" | openssl/apps/openssl s_client -CAfile $dir/RootCA.crt -connect 35.212.47.84:443
 
     # Increment loop counter
     loop=`expr $loop + 1`

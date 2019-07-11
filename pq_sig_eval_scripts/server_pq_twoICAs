@@ -40,4 +40,4 @@ apps/openssl x509 -req -in $dir/Server.csr -out $dir/Server.crt -CA $dir/ICAb2.c
 
 cat $dir/ICAb2.crt $dir/ICAb1.crt > $dir/doubleICA.crt
 
-apps/openssl s_server -cert $dir/Server.crt -key $dir/Server.key -chainCAfile $dir/doubleICA.crt -www -tls1_3
+sudo apps/openssl s_server -cert $dir/Server.crt -key $dir/Server.key -chainCAfile $dir/doubleICA.crt -www -tls1_3 -accept 443
