@@ -15,7 +15,7 @@ dir="$(pwd)"
 
 cd liboqs/
 autoreconf -i
-./configure --prefix=home/dsike/pq_auth_eval_tls1.3/openssl/oqs --enable-shared=no --enable-openssl --with-openssl-dir=/usr/local/openssl13 
+./configure --prefix=$dir/openssl/oqs --enable-shared=no
 make -j
 make install
 
