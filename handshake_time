@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--file', action='store', dest='filename', required=False,
                     default='test1.pcap', help='Name of tshark pcap file')
 parser.add_argument('--port', action='store', dest='port', required=False,
-                    default=4433, help='TCP/TLS socket number')
+                    default=12121, help='TCP/TLS socket number')
 arg = parser.parse_args()
 
 # Build out the tshark command
@@ -60,6 +60,7 @@ for line in output.split('\n'):
     	cert_data = 0
     	cert_dur = 0
         cert_flag = 1
+        cert_stop = 0
         line = re.sub(' +', ' ', line)
         line_list = line.split(' ')
         cert_data = cert_data + float(line_list[6])
@@ -72,6 +73,7 @@ for line in output.split('\n'):
         continue          
     if line.find('TCP Retransmission') != -1: 
         tcp_retran_count += 1
+        continue
     # End of the session (look for the last Application data)
     if line.find('Application Data') != -1:
         if cert_flag == 1:
