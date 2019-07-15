@@ -1,0 +1,36 @@
+#!/bin/bash
+
+
+current_d="$(pwd)"
+dir="$(pwd)"/../pq_sig_eval_Keys_Certs
+
+
+cd ../openssl/
+
+# Generate Root Certificate Key and Root Certificate
+apps/openssl ecparam -name secp384r1 -genkey -out $dir/RootCA.key
+
+apps/openssl req -config $current_d/openssl.cnf \
+      -key $dir/RootCA.key \
+      -new -x509 -days 365 \
+      -out $dir/RootCA.crt -nodes -subj "/CN=oqstest CA"
+
+
+# Generate Inermediate CA certificate key (ICAa)
+apps/openssl ecparam -name secp384r1 -genkey -out $dir/ICAa.key
+# Generate Intermediate CA (ICAa) .csr
+apps/openssl req -new -keyout $dir/ICAa.key -out $dir/ICAa.csr -nodes -subj "/CN=oqstest ICAa" -config $current_d/openssl_ICAa.cnf
+# Sign the Intermediate CA (ICAa) by the Root CA
+apps/openssl x509 -req -extfile $current_d/openssl.cnf -extensions v3_intermediate_ca -in $dir/ICAa.csr -out $dir/ICAa.crt -CA $dir/RootCA.crt \
+             -CAkey $dir/RootCA.key -CAcreateserial -days 365 
+#apps/openssl ca -config apps/openssl.cnf -extensions v3_intermediate_ca -days 365 -notext -in ICAa.csr -out ICAa.crt
+
+# Generate Server certificate key
+apps/openssl ecparam -name secp384r1 -genkey -out Server.key
+# Generate Server Certificate .csr
+apps/openssl req -new -keyout $dir/Server.key -out $dir/Server.csr -nodes -subj "/CN=oqstest server" -config $current_d/openssl_ICAa.cnf
+# Sign the Server Certificate CSR using the Intermediate CA
+apps/openssl x509 -req -in $dir/Server.csr -out $dir/Server.crt -CA $dir/ICAa.crt -CAkey $dir/ICAa.key -CAcreateserial -days 365
+
+
+sudo apps/openssl s_server -cert $dir/Server.crt -key $dir/Server.key -chainCAfile $dir/ICAa.crt -www -tls1_3 -accept 12121

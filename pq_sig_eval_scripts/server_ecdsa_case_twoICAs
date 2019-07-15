@@ -1,0 +1,44 @@
+#!/bin/bash
+
+current_d="$(pwd)"
+dir="$(pwd)"/../pq_sig_eval_Keys_Certs
+
+
+cd ../openssl/
+
+# Generate Root Certificate Key and Root Certificate
+apps/openssl ecparam -name secp384r1 -genkey -out $dir/RootCA.key
+
+apps/openssl req -config $current_d/openssl.cnf \
+      -key $dir/RootCA.key \
+      -new -x509 -days 365 \
+      -out $dir/RootCA.crt -nodes -subj "/CN=oqstest CA"
+
+# Generate Inermediate CA certificate key (ICAb1)
+apps/openssl ecparam -name secp384r1 -genkey -out $dir/ICAb1.key
+# Generate Intermediate CA (ICAb1) .csr
+apps/openssl req -new -keyout $dir/ICAb1.key -out $dir/ICAb1.csr -nodes -subj "/CN=oqstest ICAb1" -config $current_d/openssl_ICAb1.cnf
+# Sign the Intermediate CA (ICAb1) by the Root CA
+apps/openssl x509 -req -extfile $current_d/openssl.cnf -extensions v3_intermediate_ca -in $dir/ICAb1.csr -out $dir/ICAb1.crt \
+			-CA $dir/RootCA.crt -CAkey $dir/RootCA.key -days 365 -CAcreateserial
+#apps/openssl ca -config apps/openssl.cnf -extensions v3_intermediate_ca -days 365 -notext -in ICAb1.csr -out ICAb1.crt
+
+# Generate Second Inermediate CA certificate key (ICAb2)
+apps/openssl ecparam -name secp384r1 -genkey -out $dir/ICAb2.key
+# Generate Second Intermediate CA (ICAb2) .csr
+apps/openssl req -new -keyout $dir/ICAb2.key -out $dir/ICAb2.csr -nodes -subj "/CN=oqstest ICAb2" -config $current_d/openssl_ICAb2.cnf
+# Sign the Second Intermediate CA (ICAb1) by the First Intermediate CA (ICAb2)
+apps/openssl x509 -req -extfile $current_d/openssl_ICAb1.cnf -extensions v3_intermediate_ca -in $dir/ICAb2.csr -out $dir/ICAb2.crt \
+			-CA $dir/ICAb1.crt -CAkey $dir/ICAb1.key -days 365 -CAcreateserial
+
+
+# Generate Server certificate key
+apps/openssl ecparam -name secp384r1 -genkey -out $dir/Server.key
+# Generate Server Certificate .csr
+apps/openssl req -new -keyout $dir/Server.key -out $dir/Server.csr -nodes -subj "/CN=oqstest server" -config $current_d/openssl_ICAb2.cnf
+# Sign the Server Certificate CSR using the Second Intermediate CA (ICAb2)
+apps/openssl x509 -req -in $dir/Server.csr -out $dir/Server.crt -CA $dir/ICAb2.crt -CAkey $dir/ICAb2.key -CAcreateserial -days 365
+
+cat $dir/ICAb2.crt $dir/ICAb1.crt > $dir/doubleICA.crt
+
+sudo apps/openssl s_server -cert $dir/Server.crt -key $dir/Server.key -chainCAfile $dir/doubleICA.crt -www -tls1_3 -accept 12121
