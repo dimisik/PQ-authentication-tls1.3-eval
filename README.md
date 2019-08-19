@@ -1,2 +1,2 @@
-# pq_auth_eval_tls1.3
+# PQ-authentication-tls1.3-eval
 Scripts for evaluating Post-Quantum authentication in TLS 1.3
