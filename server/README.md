@@ -3,32 +3,47 @@
 ## Clone OQS openssl
 
 git clone  https://github.com/dimisik/openssl.git
+
 cd openssl
+
 git checkout add_falcon_tls_1_3
 
 ## Clone, Build, Install liboqs
 
 cd ..
+
 git clone https://github.com/dimisik/liboqs.git 
+
 cd liboqs
+
 git checkout add_falcon
+
 autoreconf -i
+
 ./configure --prefix=<PATH to openssl>/openssl/oqs --enable-shared=no
+
 make -j
+
 sudo make install
  
 ## Build, Install openssl
 
 cd ../openssl
+
 ./config no-shared --prefix=<PATH>/oqs_openssl --openssldir=<PATH>/oqs_openssl
+
 sudo make install
 
 ## Build, Install liboqs in oqs_openssl
 
 cd ../liboqs
+
 autoreconf -i
+
 ./configure --prefix=<PATH to oqs_openssl>/oqs_openssl/oqs --enable-shared=no
+
 make -j
+
 sudo make install
 
 ## Download and Build nginx and dependences
@@ -40,7 +55,6 @@ tar zxvf nginx-1.17.0.tar.gz
 cd nginx-1.17.0
 ./configure --prefix=<PATH>/nginx --with-http_ssl_module --with-openssl=<PATH to oqs_openssl>/oqs_openssl --without-http_gzip_module
 
-make
 	Changes in objs/Makefile:
 		- Remove -I <PATH to oqs_openssl>/oqs_openssl/.openssl/include
 		  and add -I /usr/local/oqs_openssl/include \
@@ -79,7 +93,7 @@ make
 		-(For compatibility with openssl 1.1.x) EVP_MD_CTX_create() and EVP_MD_CTX_destroy() were renamed to EVP_MD_CTX_new() and EVP_MD_CTX_free() in OpenSSL 1.1.
 		- Rename EVP_MD_CTX_create() and EVP_MD_CTX_destroy() to EVP_MD_CTX_new() and EVP_MD_CTX_free() respectively
 
-
+make
 sudo make install
 
 
