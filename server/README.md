@@ -40,6 +40,7 @@
 	./configure --prefix=<PATH>/nginx --with-http_ssl_module --with-openssl=<PATH to oqs_openssl>/oqs_openssl --without-http_gzip_module
 
 Changes in objs/Makefile:
+
 		- Remove -I <PATH to oqs_openssl>/oqs_openssl/.openssl/include
 		  and add -I /usr/local/oqs_openssl/include \
 	              -I /usr/local/oqs_openssl/oqs/include \
@@ -73,7 +74,8 @@ Changes in objs/Makefile:
 		#	&& $(MAKE) \
 		#	&& $(MAKE) install_sw LIBDIR=lib
 		
-Changes in src/event/ngx_event_openssl.c
+Changes in src/event/ngx_event_openssl.c:
+
 		-(For compatibility with openssl 1.1.x) EVP_MD_CTX_create() and EVP_MD_CTX_destroy() were renamed to EVP_MD_CTX_new() and EVP_MD_CTX_free() in OpenSSL 1.1.
 		- Rename EVP_MD_CTX_create() and EVP_MD_CTX_destroy() to EVP_MD_CTX_new() and EVP_MD_CTX_free() respectively
 
@@ -89,6 +91,7 @@ Changes in src/event/ngx_event_openssl.c
 	./configure --prefix=<PATH>/oqs_siege --with-ssl=<PATH to oqs_openssl>
 
 Changes in siege/Makefile:
+
 		- SSL_LIBS = -lssl -lcrypto -loqs -ldl
 	
 		- Add I<PATH to oqs_openssl>/oqs_openssl/oqs/include
@@ -118,5 +121,6 @@ Changes in siege/src/Makefile:
 	make install
 
 Example siege 
+
 	/opt/siege/bin/siege -b -t1S  https://cisco.com
 
